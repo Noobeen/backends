@@ -75,7 +75,7 @@ def format_firestore_data(data):
     # Extract only the occupancy data as shown in your screenshot
     if 'occupancy' in data:
         occupancy = data['occupancy']
-        formatted_msg = f"Bus Occupancy: {occupancy}"
+        formatted_msg = f"No : {occupancy}"
         return formatted_msg[:32]  # Truncate to 32 chars to fit LCD display
     
     return None
