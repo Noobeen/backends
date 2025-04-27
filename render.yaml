@@ -11,5 +11,6 @@ services:
     envVars:
       - key: RENDER
         value: true
-      - key: FIREBASE_CREDENTIALS
-        sync: false
+    secrets:
+      - name: firebase_credentials.json
+        mountPath: /etc/secrets/

@@ -13,24 +13,30 @@ load_dotenv()
 # Initialize Firebase Admin SDK with credentials
 # Check if running on Render (production) or locally
 if os.environ.get('RENDER'):
-    # In production, use environment variable with the JSON content
+    # In production, try to load from secrets file first
     try:
-        # Get the JSON string from environment variable
-        firebase_creds_json = os.environ.get('FIREBASE_CREDENTIALS')
-        if firebase_creds_json:
-            # Parse the JSON string
-            cred_dict = json.loads(firebase_creds_json)
-            cred = credentials.Certificate(cred_dict)
+        # Path to secrets file in Render
+        secrets_path = '/etc/secrets/firebase_credentials.json'
+        if os.path.exists(secrets_path):
+            print("Loading Firebase credentials from Render secrets file")
+            cred = credentials.Certificate(secrets_path)
         else:
-            raise ValueError("FIREBASE_CREDENTIALS environment variable is empty")
+            # Fallback to environment variable if secrets file doesn't exist
+            firebase_creds_json = os.environ.get('FIREBASE_CREDENTIALS')
+            if firebase_creds_json:
+                # Parse the JSON string
+                cred_dict = json.loads(firebase_creds_json)
+                cred = credentials.Certificate(cred_dict)
+            else:
+                raise ValueError("Neither secrets file nor FIREBASE_CREDENTIALS environment variable found")
     except Exception as e:
-        print(f"Error loading Firebase credentials from environment: {e}")
+        print(f"Error loading Firebase credentials in production: {e}")
         # Don't fallback to file-based credentials in production for security
         raise
 else:
     # Local development - prefer environment variable even in development
     try:
-        # Try to get from environment variable first (recommended)
+        # Try to get from environment variable first
         firebase_creds_json = os.environ.get('FIREBASE_CREDENTIALS')
         if firebase_creds_json:
             # Parse the JSON string
